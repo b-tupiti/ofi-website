@@ -8,6 +8,7 @@ on:
 
 env:
   AWS_REGION: ap-southeast-2
+  BUCKET_NAME: ofi-web
 
 permissions:
   id-token: write
@@ -44,4 +45,4 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync ./out s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete
+          aws s3 sync ./out s3://${{ env.BUCKET_NAME }} --delete
