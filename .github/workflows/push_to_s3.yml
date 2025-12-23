@@ -1,0 +1,42 @@
+name: Deploy Next.js to S3
+
+on:
+  push:
+    branches:
+      - main  # Set this to your default branch
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ap-southeast-2
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+        # Ensure next.config.js has output: 'export'
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+            role-to-assume: arn:aws:iam::824246083439:role/GithubActionsRole
+            aws-region: ${{ env.AWS_REGION }}
+            role-duration-seconds: 1800
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync ./out s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete
